@@ -3,10 +3,19 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <time.h>
 #include "typedefs.h"
 #include "serial.h"
 #include "cf_packet.h"
 #include "show_packet.h"
+
+void msleep(int milliseconds)
+{
+    struct timespec ts;
+    ts.tv_sec = milliseconds / 1000;
+    ts.tv_nsec = (milliseconds % 1000) * 1000000;
+    nanosleep(&ts, NULL);
+}
 
 /* Convert C from hexadecimal character to integer.  */
 static int hextobin (unsigned char c)
@@ -28,13 +37,11 @@ int main(int argc, char* argv[])
 	//If only 0 or 1 parameter is entered, prompt for the missing parameter(s)
 	if(argc < 3)
 	{
-		printf("\nMISSING A PARAMETER. Enter both PORT and command string.\n\n");
-		printf("Examples\n");
-		printf("\tcfa_send /dev/ttyUSB0 \"\\x05\\d003\\x08\\x12\\x63\"\n");
-		printf("\tcfa_send /dev/ttyUSB0 \"\\x06\\d000\"\n");
-		printf("\tcfa_send /dev/ttyUSB0 \"\\x1f\\d022\\d000\\d00012345678901234567890\"\n");
-		printf("\tcfa_send /dev/ttyUSB0 \"\\x1f\\d022\\d000\\d001abcdefghijklmnopqrst\"\n");
-		printf("\nCommand string can be ....\n");
+		printf("cfa_send v1.1\n");
+		printf("\n");
+		printf("MISSING A PARAMETER. Enter both PORT and command string.\n");
+		printf("\n");
+		printf("Command string can be ....\n");
 		printf("\\\\\n");
 		printf("\tbackslash\n");
 		printf("\\xHH\n");
@@ -43,6 +50,13 @@ int main(int argc, char* argv[])
 		printf("\tbyte with decimal value DDD (1 to 3 digits)\n");
 		printf("\\0NNN\n");
 		printf("\tbyte with octal value NNN (1 to 3 digits)\n");
+		printf("\n");
+		printf("Examples\n");
+		printf("\tcfa_send /dev/ttyUSB0 \"\\x05\\d003\\x08\\x12\\x63\"\n");
+		printf("\tcfa_send /dev/ttyUSB0 \"\\x06\\d000\"\n");
+		printf("\tcfa_send /dev/ttyUSB0 \"\\x1f\\d022\\d000\\d00012345678901234567890\"\n");
+		printf("\tcfa_send /dev/ttyUSB0 \"\\x1f\\d022\\d000\\d001abcdefghijklmnopqrst\"\n");
+		printf("\n");
 		return(-1);
 	}
 
@@ -137,7 +151,7 @@ int main(int argc, char* argv[])
 
 	if(Serial_Init(argv[1],baud))
 	{
-		printf("Could not open port \"%s\" at \"%d\" baud.\n",argv[1],baud);
+		printf("cfa_send: Could not open port \"%s\" at \"%d\" baud.\n",argv[1],baud);
 		return(-1);
 	}
 	//else
@@ -157,15 +171,18 @@ int main(int argc, char* argv[])
 	int k;
 	int timed_out;
 	timed_out = 1; //default timed_out is true
-	for(k=0;k<=10000;k++)
+	for(k=0;k<30;k++) // timeout at 300msec = 10msec x 30. CFA LCD spec. is 250msec
+	{
+		msleep(10);
 		if(check_for_packet())
 		{
-			ShowReceivedPacket();
+			//ShowReceivedPacket();
 			timed_out = 0; //set timed_out to false
 			break;
 		}
+	}
 	if(timed_out)
-		printf("Timed out waiting for a response.\n");
+		printf("cfa_send: Timed out waiting for a response.\n");
 
 	Uninit_Serial();
 

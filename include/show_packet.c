@@ -141,7 +141,6 @@ void ShowReceivedPacket(void)
   //key
   if(incoming_command.command==0x80)
   {
-    /*
     printf("C=%d(key:%s),L=%d,D=\"%s\",CRC=0x%04X\n",
       incoming_command.command,incoming_command.data[0]<=20?
         key_names[incoming_command.data[0]]:
@@ -149,12 +148,10 @@ void ShowReceivedPacket(void)
       incoming_command.data_length,
       expanded,
       incoming_command.CRC.as_word);
-    */
   }
   else
   {
 	//any other packet types
-    /*
     printf("C=%d(%s),L=%d,D=\"%s\",CRC=0x%04X\n",
       incoming_command.command,
       ((incoming_command.command&0xC0)==0xC0)?
@@ -163,7 +160,6 @@ void ShowReceivedPacket(void)
       incoming_command.data_length,
       expanded,
       incoming_command.CRC.as_word);
-    */
   }
 }
 //============================================================================
