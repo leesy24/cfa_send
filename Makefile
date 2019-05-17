@@ -1,9 +1,7 @@
 #Makefile for Crystalfontz UNIX examples
 
-CC = i486-openwrt-linux-gcc
-STRIP = i486-openwrt-linux-strip
-#CC = gcc
-#STRIP = strip
+CC ?= gcc
+STRIP ?= strip
 LIBS = 
 CFLAGS = -g -O -Iinclude -Wall
 LDFLAGS = -g
